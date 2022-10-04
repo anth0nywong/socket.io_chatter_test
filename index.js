@@ -9,7 +9,17 @@ const app = (0, express_1.default)();
 const http_1 = __importDefault(require("http"));
 const server = http_1.default.createServer(app);
 const socket_io_1 = require("socket.io");
-const port = 3000;
+const port = normalizePort(process.env.PORT || '3000');
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+    if (isNaN(port)) {
+        return val;
+    }
+    if (port >= 0) {
+        return port;
+    }
+    return false;
+}
 const io = new socket_io_1.Server(server);
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);

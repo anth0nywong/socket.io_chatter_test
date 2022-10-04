@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 
 const port = normalizePort(process.env.PORT || '3000');
 
-function normalizePort(val) {
+function  normalizePort(val) {
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
