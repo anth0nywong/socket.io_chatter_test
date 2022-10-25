@@ -9,6 +9,7 @@ exports.default = {
     TYPING: "TYPING",
     VERIFY_USER: "VERIFY_USER",
     LOGON: "LOGON",
-    LOGOUT: "LOGOUT"
+    LOGOUT: "LOGOUT",
+    PRIVATE_MESSAGE: "PRIVATE_MESSAGE"
 };
 //# sourceMappingURL=Events.js.map

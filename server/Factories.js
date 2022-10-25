@@ -2,12 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTime = exports.createChat = exports.createMessage = exports.createUser = void 0;
 const uuid_1 = require("uuid");
-const createUser = ({ name = "" } = {}) => ({
+const createUser = ({ name = "", socketId = null } = {}) => ({
     id: (0, uuid_1.v4)(),
-    name
+    name,
+    socketId
 });
 exports.createUser = createUser;
-const createMessage = ({ message = "", sender = "" } = { sender: "hello" }) => ({
+const createMessage = ({ message = "", sender = "" } = {}) => ({
     id: (0, uuid_1.v4)(),
     time: (0, exports.getTime)(new Date(Date.now())),
     message,
