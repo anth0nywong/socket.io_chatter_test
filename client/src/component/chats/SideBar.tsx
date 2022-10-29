@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {useState, Component, useEffect} from 'react';
 import {RiMenuFill} from 'react-icons/ri';
 import {FaSearch} from 'react-icons/fa';
 import {MdEject} from 'react-icons/md';
@@ -6,25 +6,21 @@ import ChatData from '../../model/chat';
 import { SyntheticEvent } from 'react';
 
 
-export default class SideBar extends Component<{chats: ChatData[], activeChat: any, logout:Function, user: {id:number, name:string} | null, setActiveChat:Function, onSendPrivateMessage: Function}, {receiver: string}>{
-    constructor(props: any){
-        super(props);
-        this.state={
-            receiver:""
-        }
-    }
+const SideBar : React.FC<{chats: ChatData[], activeChat: any, logout:Function, user: {id:number, name:string}, setActiveChat:Function, onSendPrivateMessage: Function}>
+ = ({chats, activeChat,  logout, user, setActiveChat, onSendPrivateMessage}) =>{
     
-    handleSubmit = (e : SyntheticEvent)=>{
-        e.preventDefault();
-        const {receiver} = this.state;
-        const {onSendPrivateMessage} = this.props;
+    const [receiver, setReceiver] = useState("");
+    
 
+    let handleSubmit = (e : SyntheticEvent)=>{
+        console.log(receiver);
+        e.preventDefault();
         onSendPrivateMessage(receiver);
+        setReceiver("");
     }
-    render(){
-        
-        const { chats, activeChat, user, setActiveChat, logout} = this.props;   
-        return(
+
+    //const { chats, activeChat, user, setActiveChat, logout} = this.props;   
+    return(
             <div id="side-bar">
                 <div className="heading">
                     <div className="app-name">Our Cool Chat</div>
@@ -32,32 +28,32 @@ export default class SideBar extends Component<{chats: ChatData[], activeChat: a
                         <RiMenuFill/>
                     </div>
                 </div>
-                <form onSubmit={this.handleSubmit} className="search">
+                <form onSubmit={handleSubmit} className="search">
                     <i className="search-icon"><FaSearch/></i>
-                    <input onChange={(e)=>{this.setState({receiver:e.target.value})}} placeholder="Search" type="text"/>
+                    <input value={receiver} onChange={(e)=>{setReceiver(e.target.value)}} placeholder="Search" type="text"/>
                     <div className="plus"></div>
                 </form>
                 <div className="users"
-                    onClick={(e)=>{(e.target === this.refs.user) && setActiveChat(null)}}>
+                    onClick={(e)=>{const target : any = e.target; (target.className === "users")&& setActiveChat(null)}}>
                         
                         {chats.map((chat : ChatData)=>{
                             if(chat.name){
                                 const lastMessage = chat.messages[chat.messages.length-1];
                                 //Fix later
-                                const user = chat.users.find(({name} : any)=>{
-                                    return name !== this.props.user?.name;
+                                let thisUser : any = chat.users.find(({name} : any)=>{
+                                    return name !== user?.name;
                                 }) || {name:"Community"};
                                 const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : '';
 
                                 return(<div
                                     key={chat.id}
-                                    className={`user${classNames}`}
+                                    className={`user ${classNames}`}
                                     onClick={()=>{
                                         setActiveChat(chat);
                                     }}>
-                                        <div className="user-photo">{user.name[0].toUpperCase()}</div>
+                                        <div className="user-photo">{thisUser.name[0].toUpperCase()}</div>
                                         <div className="user-info">
-                                            <div className="name">{user.name}</div>
+                                            <div className="name">{thisUser.name}</div>
                                             {lastMessage && <div className="last-message">{lastMessage.message}</div>}
                                         </div>
                                 </div>
@@ -73,6 +69,7 @@ export default class SideBar extends Component<{chats: ChatData[], activeChat: a
                         </div>
                     </div>
             </div>
-        )
-    }
+    );
 }
+
+export default SideBar;
