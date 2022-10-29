@@ -7,6 +7,7 @@ const index_1 = __importDefault(require("./index"));
 const Factories_1 = require("./Factories");
 const Events_1 = __importDefault(require("./Events"));
 let connectedUsers = {};
+let privateChatUsers = [];
 let communtyChat = (0, Factories_1.createChat)();
 function default_1(socket) {
     console.log("Socket Id" + socket.id);
@@ -54,17 +55,35 @@ function default_1(socket) {
     socket.on(Events_1.default.TYPING, ({ chatId, isTyping }) => {
         sendTypingFromUser(chatId, isTyping);
     });
-    socket.on(Events_1.default.PRIVATE_MESSAGE, ({ receiver, sender }) => {
-        console.log(receiver, sender);
+    socket.on(Events_1.default.PRIVATE_MESSAGE, ({ receiver, sender, activeChat }) => {
+        if (receiver == sender)
+            return false;
         if (receiver in connectedUsers) {
-            const newChat = (0, Factories_1.createChat)({ name: `${receiver}&${sender}`, users: [connectedUsers[receiver], connectedUsers[sender]] });
             const receiverSocket = connectedUsers[receiver].socketId;
-            console.log("break");
-            socket.to(receiverSocket).emit(Events_1.default.PRIVATE_MESSAGE, newChat);
-            console.log("sent");
-            socket.emit(Events_1.default.PRIVATE_MESSAGE, newChat);
+            if (activeChat == null || activeChat === communtyChat.id) {
+                const newChat = (0, Factories_1.createChat)({ name: `${receiver}&${sender}`, users: [connectedUsers[receiver], connectedUsers[sender]] });
+                socket.to(receiverSocket).emit(Events_1.default.PRIVATE_MESSAGE, newChat);
+                socket.emit(Events_1.default.PRIVATE_MESSAGE, newChat);
+            }
+            else {
+                socket.to(receiverSocket).emit(Events_1.default.PRIVATE_MESSAGE, activeChat);
+            }
         }
     });
+    function removePair(socket) {
+        if (privateChatUsers[socket.user.name]) {
+            privateChatUsers[socket.user.name].forEach((pairedUsers) => {
+                privateChatUsers[pairedUsers] = privateChatUsers[pairedUsers].filter((x) => {
+                    if (x == socket.user.name)
+                        return false;
+                    return true;
+                });
+            });
+            privateChatUsers[socket.user.name] = [];
+        }
+        const x = `${Events_1.default.USER_DISCONNECTED}`;
+        index_1.default.emit(x, { userName: socket.user.name });
+    }
     function sendTypingToChat(user) {
         return (chatId, isTyping) => {
             const x = `${Events_1.default.TYPING}-${chatId}`;
