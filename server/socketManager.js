@@ -60,7 +60,7 @@ function default_1(socket) {
             return false;
         if (receiver in connectedUsers) {
             const receiverSocket = connectedUsers[receiver].socketId;
-            if (activeChat == null || activeChat === communtyChat.id) {
+            if (activeChat == null || activeChat.id === communtyChat.id) {
                 const newChat = (0, Factories_1.createChat)({ name: `${receiver}&${sender}`, users: [connectedUsers[receiver], connectedUsers[sender]] });
                 socket.to(receiverSocket).emit(Events_1.default.PRIVATE_MESSAGE, newChat);
                 socket.emit(Events_1.default.PRIVATE_MESSAGE, newChat);
@@ -69,6 +69,7 @@ function default_1(socket) {
                 socket.to(receiverSocket).emit(Events_1.default.PRIVATE_MESSAGE, activeChat);
             }
         }
+        return true;
     });
     function removePair(socket) {
         if (privateChatUsers[socket.user.name]) {
