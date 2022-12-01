@@ -18,6 +18,7 @@ const ChatContainer : React.FC<{socket: Socket, user: UserModel, logout:Function
     useEffect(()=>{
         initSocket(socket);
     }, []);
+    
 
     function initSocket(socket: Socket){
         socket.emit(events.COMMUNITY_CHAT, resetChat);
