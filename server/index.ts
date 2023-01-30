@@ -1,11 +1,15 @@
 import http from "http";
-import express from "express";
-const app = express();
-const server = http.createServer(app);
+import app from "./config/app.js";
+
 import path from 'path';
 import SocketManager from './socketManager.js';
 //import Server function from socket.io
 import { Server } from "socket.io";
+import { AddressInfo } from 'net';
+
+
+const server = http.createServer(app);
+
 //Port management
 const port = normalizePort(process.env.PORT || '3231');
 function normalizePort(val) {
@@ -54,7 +58,41 @@ server.listen(port, ()=>
 {
   console.log(`Server is running on port ${port}`);
 });
+
+function onListening() {
+  let addr = server.address() as string | AddressInfo;
+  let bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  console.log('Listening on ' + bind);
+}
 //Establish socket functions
 io.on("connection", SocketManager);
+
+server.on('error', onError);
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  let bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
 
 export default io;

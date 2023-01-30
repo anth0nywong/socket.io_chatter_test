@@ -24,7 +24,6 @@ interface ChatModel
 }
 
 let connectedUsers = {};
-let privateChatUsers : string[][] = [];
 let communtyChat : ChatModel = createChat();
 
 export default function(socket){
@@ -47,21 +46,22 @@ export default function(socket){
 
     socket.on(events.USER_CONNECTED, (user : any)=>
     {
+        console.log(user);
         user.socketId = socket.id;
-        connectedUsers = addUser(connectedUsers, user);
         socket.user = user;
+        connectedUsers = addUser(connectedUsers, user);
+        updateUserList();
 
         sendMesssageToChatFromUser = sendMessageToChat(user.name);
         sendTypingFromUser = sendTypingToChat((user.name));
 
         socket.emit(events.USER_CONNECTED, connectedUsers);
-        console.log(connectedUsers);
     });
 
     socket.on('disconnect', ()=>{
         if("user" in socket){
-            //removePair(socket);
             connectedUsers = removeUser(connectedUsers, socket.user.name);
+            updateUserList();
             socket.emit(events.USER_DISCONNECTED, connectedUsers);
             console.log("Disconnected");
             console.log(connectedUsers);
@@ -70,7 +70,7 @@ export default function(socket){
 
     socket.on(events.LOGOUT, ()=>{
         connectedUsers = removeUser(connectedUsers, socket.user.name);
-        //removePair(socket);
+        updateUserList();
         socket.emit(events.USER_DISCONNECTED, connectedUsers);
         console.log("Disconnected");
         console.log(connectedUsers);
@@ -79,6 +79,7 @@ export default function(socket){
     socket.on(events.COMMUNITY_CHAT, (callback)=>
     {
         callback(communtyChat);
+        updateUserList();
     });
 
     socket.on(events.MESSAGE_SENT, ({chatId, message})=>{
@@ -110,42 +111,9 @@ export default function(socket){
             else{
                 socket.to(receiverSocket).emit(events.PRIVATE_MESSAGE, activeChat);
             }
-            
-            //get receiver object and its socket ids
-            
-            // if(privateChatUsers[sender])
-            // {
-            //     console.log(privateChatUsers[sender]);
-            //     if(privateChatUsers[sender].includes(receiver))
-            //     return false;
-            // }
-            // //Create Empty array for users paired with sender
-            // if(!privateChatUsers[sender]){ privateChatUsers[sender] = []};
-            // //Create Empty array for users paired with receiver
-            // if(!privateChatUsers[receiver]){ privateChatUsers[receiver] = []};
-            
-            // privateChatUsers[sender].push(receiver);
-
-            // if(!privateChatUsers[receiver].includes(sender))privateChatUsers[receiver].push(sender);
-            // console.log("User Pairs");
-            // console.log(privateChatUsers);
         }
         return true;
     });
-    function removePair(socket){
-        if(privateChatUsers[socket.user.name])
-            {
-                privateChatUsers[socket.user.name].forEach((pairedUsers)=>{
-                    privateChatUsers[pairedUsers] = privateChatUsers[pairedUsers].filter((x)=>{
-                        if(x == socket.user.name) return false;
-                        return true;
-                    });
-                });
-                privateChatUsers[socket.user.name] = [];
-            }
-        const x : any = `${events.USER_DISCONNECTED}`;
-        io.emit(x, {userName: socket.user.name}); 
-    }
     function sendTypingToChat(user){
         return (chatId, isTyping)=>{
             const x : any = `${events.TYPING}-${chatId}`;
@@ -159,6 +127,10 @@ export default function(socket){
             
         }
     }
+    function updateUserList(){
+        const x : any = `${events.UPDATE_USER}`;
+        io.emit(x, {userList: connectedUsers})
+    }
 }
 
 function addUser(userList, user){
@@ -167,6 +139,7 @@ function addUser(userList, user){
     newList[user.name] = user;
     return newList;
 }
+
 function removeUser(userList, username){
     let newList = Object.assign({},userList)
     
@@ -178,6 +151,4 @@ function isUser(userList, username)
 {
     return username in userList;
 }
-
-
 
