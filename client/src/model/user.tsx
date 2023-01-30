@@ -4,3 +4,7 @@ export default interface IUserData
     name: string,
     scoketId:string
 }
+
+export interface UserListInterface{
+    userList:{[key: string]: IUserData}
+}

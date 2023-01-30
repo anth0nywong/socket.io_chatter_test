@@ -3,11 +3,13 @@ import {RiMenuFill} from 'react-icons/ri';
 import {FaSearch} from 'react-icons/fa';
 import {MdEject} from 'react-icons/md';
 import ChatData from '../../model/chat';
+import {UserListInterface} from '../../model/user';
 import { SyntheticEvent } from 'react';
 
 
-const SideBar : React.FC<{chats: ChatData[], activeChat: any, logout:Function, user: {id:number, name:string}, setActiveChat:Function, onSendPrivateMessage: Function}>
- = ({chats, activeChat,  logout, user, setActiveChat, onSendPrivateMessage}) =>{
+
+const SideBar : React.FC<{chats: ChatData[], activeChat: any, logout:Function, user: {id:number, name:string}, setActiveChat:Function, onSendPrivateMessage: Function, userList: UserListInterface}>
+ = ({chats, activeChat,  logout, user, setActiveChat, onSendPrivateMessage, userList}) =>{
     
     const [receiver, setReceiver] = useState("");
     
@@ -17,6 +19,15 @@ const SideBar : React.FC<{chats: ChatData[], activeChat: any, logout:Function, u
         e.preventDefault();
         onSendPrivateMessage(receiver);
         setReceiver("");
+    }
+
+    const optionFunction = () => {
+        return Object.keys(userList.userList).map((key, index)=>{
+            console.log(userList);
+            if(key != user.name){
+                return(<option key={index} value={key}>{key} </option>);
+            }
+            })
     }
 
     //const { chats, activeChat, user, setActiveChat, logout} = this.props;   
@@ -30,8 +41,13 @@ const SideBar : React.FC<{chats: ChatData[], activeChat: any, logout:Function, u
                 </div>
                 <form onSubmit={handleSubmit} className="search">
                     <i className="search-icon"><FaSearch/></i>
-                    <input value={receiver} onChange={(e)=>{setReceiver(e.target.value)}} placeholder="Search" type="text"/>
-                    <div className="plus"></div>
+                    <select 
+                    onChange={(e)=>{setReceiver(e.target.value)}} 
+                    >
+                        <option value={""}>Select User</option>
+                        {optionFunction()}
+                    </select>
+                    <div className="plus" onClick={handleSubmit}></div>
                 </form>
                 <div className="users"
                     onClick={(e)=>{const target : any = e.target; (target.className === "users")&& setActiveChat(null)}}>

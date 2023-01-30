@@ -7,13 +7,14 @@ import ChatHeading from './ChatHeading';
 import MessageInput from '../messages/MessageInput';
 //Import Data Model
 import ChatModel from '../../model/chat';
-import UserModel from '../../model/user';
+import UserModel, {UserListInterface} from '../../model/user';
 
 const ChatContainer : React.FC<{socket: Socket, user: UserModel, logout:Function}> = ({socket, user, logout}) => {
     
     const  [chats, setChats] = useState<ChatModel[]>([]);
     const  [activeChat , setActiveChat]  = useState<ChatModel | null>(null);
     const chatRef = useRef<ChatModel[]>();
+    const [userList, setUserList] = useState<UserListInterface>({userList:{}});
     chatRef.current = chats;
     useEffect(()=>{
         initSocket(socket);
@@ -23,6 +24,7 @@ const ChatContainer : React.FC<{socket: Socket, user: UserModel, logout:Function
         socket.emit(events.COMMUNITY_CHAT, resetChat);
         socket.on(events.PRIVATE_MESSAGE, addChat);
         socket.on(events.USER_DISCONNECTED, removeChat);
+        socket.on(events.UPDATE_USER, updateUser);
         //If someone reconnect, reset chat
         socket.on('connect', ()=>{
             socket.emit(events.COMMUNITY_CHAT, resetChat);
@@ -130,6 +132,11 @@ const ChatContainer : React.FC<{socket: Socket, user: UserModel, logout:Function
     const sendTyping = (chatId : string, isTyping : any) =>{
         socket?.emit(events.TYPING, {chatId, isTyping});
     }
+    const updateUser = (userList: UserListInterface) =>{
+        console.log("updateUser");
+        console.log(userList);
+        setUserList(userList);
+    }
     return(
         <div className="container">
             <SideBar
@@ -138,7 +145,8 @@ const ChatContainer : React.FC<{socket: Socket, user: UserModel, logout:Function
                 user={user}
                 activeChat={activeChat}
                 setActiveChat={setActiveChatFunction}
-                onSendPrivateMessage={sendOpenPrivateMessage}/>
+                onSendPrivateMessage={sendOpenPrivateMessage}
+                userList={userList}/>
             <div className="chat-room-container">
                 {
                     activeChat !== null ?(

@@ -7,8 +7,7 @@ const MessageInput : React.FC<{sendMessage: Function, sendTyping:Function}> = ({
     const [message, setMessage] = useState(""); 
     const [isTyping, setIsTyping] = useState<boolean>(false);
     
-    useEffect(() => {
-        
+    useEffect(() => { 
         return () => {
             stopCheckingTyping();
         };
