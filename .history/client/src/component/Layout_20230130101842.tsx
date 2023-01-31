@@ -1,0 +1,52 @@
+import React, {useEffect, useState} from 'react';
+import io, { Socket } from 'socket.io-client';
+import events from '../Events';
+import LoginForm from './LoginForm';
+import ChatContainer from './chats/ChatContainer';
+import UserModel from '../model/user';
+const socketUrl = "https://socket_server.anthonyhhwong.link/";
+
+const Layout : React.FC<{}> = () =>
+{
+    
+    useEffect(()=>{
+        initSocket();
+    },[])
+    
+    const [socket, setSocket] = useState<Socket | null>(null);
+
+
+    const initSocket = ()=>
+    {
+        const socket : Socket = io(socketUrl);
+        socket.on('connect', ()=>{
+            console.log("connected");
+        })
+        setSocket(socket}; 
+    }
+    setUser = (user : any)=>
+    {
+        const {socket}  = this.state;
+        if(socket)socket.emit(events.USER_CONNECTED, user);
+        this.setState({user})
+    }
+
+    logout = ()=>{
+        const {socket} = this.state;
+        socket?.emit(events.LOGOUT);
+        this.setState({user:null})
+    }
+
+    
+    render()
+    {
+        const {socket:socket, user:user} : any = this.state;
+        return(
+        <div className="container">
+            {user && <ChatContainer socket={socket} user={user} logout={this.logout}/> || <LoginForm socket={socket} setUser={this.setUser}/>}
+        </div>);
+    }
+    
+}
+
+export default Layout;
