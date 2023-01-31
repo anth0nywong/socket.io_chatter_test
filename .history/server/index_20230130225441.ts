@@ -50,7 +50,7 @@ interface SocketData {
 const io = new Server<ClientToServerEvents,ServerToClientEvents,InterServerEvents,SocketData>(server, 
   {
     cors: {
-      origin: "https://socket.anthonywong.link",
+      origin: "http://localhost:8080",
     },
   });
 //Listen to port
