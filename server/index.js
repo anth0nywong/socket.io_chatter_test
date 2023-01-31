@@ -21,7 +21,7 @@ function normalizePort(val) {
 }
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: "https://socket.anthonywong.link",
+        origin: "https://socket.anthonyhhwong.link",
     },
 });
 server.listen(port, () => {
